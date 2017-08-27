@@ -71,21 +71,35 @@ function quantityChoice(purchaseObj, purchase){
                 name: "totalPurchased",
             }
         ]).then(function(inqResp){
-            console.log(purchaseObj);
-            console.log(purchase);
             if (purchaseObj.stock_quantity < inqResp.totalPurchased){
                 console.log(`Sorry we don't have enough. There are only ${purchaseObj.stock_quantity} in inventory`);
                 quantityChoice(purchaseObj, purchase);
             } else {
                 console.log("We have enough for you - Making purchase...")
                 var newQuantity = purchaseObj.stock_quantity - inqResp.totalPurchased;
-                console.log(newQuantity);
-                console.log(purchaseObj.id);
+                var price = purchaseObj.price*inqResp.totalPurchased;
                 connection.query(`UPDATE products SET stock_quantity = ${newQuantity} WHERE id = ${purchaseObj.id}`);
-                displayProducts();
+                console.log(`Thank you for purchasing ${inqResp.totalPurchased} ${purchaseObj.product_name}
+        TOTAL ---  $${price}`)
+                purchaseMore();
             }
         });
 }
 
+function purchaseMore(){
+    inquirer.prompt([
+        {
+            type: "confirm",
+            message: "Would you like to purchase anything else? ",
+            name: "wantMore"
+        }
+    ]).then(function(inqResp){
+        if (inqResp.wantMore){
+            displayProducts();
+        } else{
+            process.exit();
+        }
+    });
+}
 
 
